@@ -1,0 +1,617 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
+/* ─── Bloomberg-Terminal Dark Theme ──────────────────────────── */
+@theme {
+  --color-bg-base: #0a0a0f;
+  --color-bg-surface: #12121a;
+  --color-bg-elevated: #1a1a2e;
+  --color-bg-hover: #22223a;
+  --color-bg-active: #2a2a42;
+
+  --color-border: #2a2a3e;
+  --color-border-focus: #3a3a5e;
+  --color-border-subtle: #1e1e2e;
+
+  --color-text-primary: #e8e6e3;
+  --color-text-secondary: #8b8a88;
+  --color-text-tertiary: #5a5a5e;
+  --color-text-muted: #3e3e48;
+
+  --color-accent-gold: #f0b429;
+  --color-accent-cyan: #00d4ff;
+  --color-accent-green: #36d399;
+  --color-accent-red: #f87272;
+  --color-accent-amber: #fbbf24;
+  --color-accent-blue: #60a5fa;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Lora', 'Georgia', serif;
+  --font-mono: 'IBM Plex Mono', 'Menlo', monospace;
+}
+
+/* ─── Base Styles ─────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-focus);
+}
+
+/* ─── Typography ─────────────────────────────────────────────── */
+.font-source {
+  font-family: var(--font-serif);
+}
+
+.font-citation {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.font-ui {
+  font-family: var(--font-sans);
+}
+
+/* ─── Citation Badges ────────────────────────────────────────── */
+.citation-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-accent-cyan);
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.citation-badge:hover {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.4);
+}
+
+/* ─── Resizable Split Pane ───────────────────────────────────── */
+.split-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.split-handle {
+  width: 1px;
+  background: var(--color-border);
+  cursor: col-resize;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.split-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  right: -3px;
+}
+
+.split-handle:hover,
+.split-handle.active {
+  background: var(--color-accent-gold);
+}
+
+/* ─── Data Table (Bloomberg Style) ───────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.data-table th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-surface);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+}
+
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.data-table tr:hover td {
+  background: var(--color-bg-hover);
+}
+
+/* Alignment indicators */
+.align-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.align-aligned { background: var(--color-accent-green); }
+.align-divergent { background: var(--color-accent-red); }
+.align-neutral { background: var(--color-text-tertiary); }
+
+/* ─── Input Styles ───────────────────────────────────────────── */
+.input-terminal {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 10px 14px;
+  border-radius: 4px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.input-terminal:focus {
+  border-color: var(--color-accent-gold);
+}
+
+.input-terminal::placeholder {
+  color: var(--color-text-muted);
+}
+
+textarea.input-terminal {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+/* ─── Button Styles ──────────────────────────────────────────── */
+.btn-primary {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-bg-base);
+  background: var(--color-accent-gold);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: #e5a820;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 6px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-focus);
+  background: var(--color-bg-hover);
+}
+
+/* ─── Tag Chips ──────────────────────────────────────────────── */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-accent-gold);
+  background: rgba(240, 180, 41, 0.08);
+  border: 1px solid rgba(240, 180, 41, 0.2);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+/* ─── Loading Spinner ────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.loading-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent-gold);
+  animation: pulse-glow 1.2s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+}
+
+.tab-item {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.tab-item:hover {
+  color: var(--color-text-secondary);
+}
+
+.tab-item.active {
+  color: var(--color-accent-gold);
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent-gold);
+}
+
+/* ─── Source Card ─────────────────────────────────────────────── */
+.source-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 4px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.source-card:hover {
+  border-color: var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+.source-card.selected {
+  border-color: var(--color-accent-gold);
+  background: rgba(240, 180, 41, 0.04);
+}
+
+.source-card.error {
+  border-color: rgba(248, 114, 114, 0.3);
+}
+
+/* ─── Status Indicators ──────────────────────────────────────── */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-done { background: var(--color-accent-green); }
+.status-extracting { background: var(--color-accent-gold); animation: pulse-glow 1s ease-in-out infinite; }
+.status-error { background: var(--color-accent-red); }
+.status-pending { background: var(--color-text-muted); }
+
+/* ─── Consensus/Contradiction Cards ──────────────────────────── */
+.consensus-card {
+  border-left: 3px solid var(--color-accent-green);
+  padding: 10px 14px;
+  background: rgba(54, 211, 153, 0.03);
+  border-radius: 0 4px 4px 0;
+}
+
+.contradiction-card {
+  border-left: 3px solid var(--color-accent-amber);
+  padding: 10px 14px;
+  background: rgba(251, 191, 36, 0.03);
+  border-radius: 0 4px 4px 0;
+}
+
+.connection-card {
+  border-left: 3px solid var(--color-accent-cyan);
+  padding: 10px 14px;
+  background: rgba(0, 212, 255, 0.03);
+  border-radius: 0 4px 4px 0;
+}
+
+/* ─── Chat Terminal Style ────────────────────────────────────── */
+.chat-response {
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+.chat-response strong {
+  color: var(--color-accent-gold);
+  font-weight: 600;
+}
+
+.chat-response h2, .chat-response h3 {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.chat-response ul, .chat-response ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.chat-response li {
+  margin: 4px 0;
+  color: var(--color-text-secondary);
+}
+
+.chat-response blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  border-left: 2px solid var(--color-accent-cyan);
+  padding-left: 14px;
+  margin: 12px 0;
+  color: var(--color-text-secondary);
+}
+
+/* ─── Utility Animations ─────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadein {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* ─── Knowledge Base Search ──────────────────────────────────── */
+.search-result {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background 0.1s ease;
+}
+
+.search-result:hover {
+  background: var(--color-bg-hover);
+}
+
+/* ─── Bento Grid ─────────────────────────────────────────────── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.bento-span-1 { grid-column: span 1; }
+.bento-span-2 { grid-column: span 2; }
+.bento-span-full { grid-column: span 3; }
+
+@media (max-width: 768px) {
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-span-1, .bento-span-2, .bento-span-full { grid-column: span 1; }
+}
+
+/* ─── Bento Card ─────────────────────────────────────────────── */
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
+  min-height: 220px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-card:hover {
+  border-color: var(--color-border);
+  background: var(--color-bg-elevated);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(240, 180, 41, 0.05);
+}
+
+.bento-card-bg {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+  pointer-events: none;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 70%, transparent 100%);
+}
+
+.bento-card:hover .bento-card-bg {
+  opacity: 0.85;
+}
+
+.bento-card-content {
+  position: relative;
+  z-index: 10;
+  padding: 14px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: linear-gradient(
+    to bottom,
+    var(--color-bg-surface) 0%,
+    var(--color-bg-surface) 100%
+  );
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.bento-card:hover .bento-card-content {
+  background: linear-gradient(
+    to bottom,
+    var(--color-bg-elevated) 0%,
+    var(--color-bg-elevated) 100%
+  );
+}
+
+.bento-card-icon {
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.bento-card-title {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.bento-card-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.bento-card-cta {
+  margin-top: auto;
+  padding-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent-gold);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
+}
+
+.bento-card:hover .bento-card-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Marquee Animation ──────────────────────────────────────── */
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration, 20s) linear infinite;
+}
+
+.marquee-reverse {
+  animation-direction: reverse;
+}
+
+.marquee-pause-hover:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Animated Gradient Border (subtle) ──────────────────────── */
+@keyframes border-glow {
+  0%, 100% { border-color: var(--color-border-subtle); }
+  50% { border-color: var(--color-border); }
+}
+
