@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Container } from '../components/ui/Container';
 import { SourceIndexBadge, Badge } from '../components/ui/Badge';
 import { CitationChip } from '../components/ui/CitationChip';
+import { Footer } from '../components/Footer';
 
-export function LandingPage({ onLaunchWorkspace, onLoadBenchmark }) {
+export function LandingPage({ onLaunchWorkspace, onLoadBenchmark, onRouteChange }) {
   // Live demo step sequencer
   const [demoStep, setDemoStep] = useState(0);
 
@@ -19,266 +21,315 @@ export function LandingPage({ onLaunchWorkspace, onLoadBenchmark }) {
     { index: 3, title: 'Schaeffer et al. (Stanford)', claim: 'Emergent Abilities Mirage Analysis', domain: 'arxiv.org' },
   ];
 
+  const trustedDomains = [
+    'arxiv.org',
+    'nature.com',
+    'biorxiv.org',
+    'youtube.com',
+    'science.org',
+    'openreview.net',
+    'pubmed.ncbi.nlm.nih.gov',
+  ];
+
   return (
     <div className="flex-1 flex flex-col overflow-y-auto bg-[var(--bg)]">
-      {/* ─── Hero Section ────────────────────────────────────────── */}
-      <section className="max-w-[1300px] w-full mx-auto px-6 py-12 lg:py-20 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-        {/* Left: Left-aligned Editorial Hero */}
-        <div className="flex-1 space-y-6 text-left">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-[var(--surface-2)] border border-[var(--border)]">
-            <span className="dot-live" />
-            <span className="font-terminal text-[0.68rem] uppercase tracking-wider text-[var(--muted)]">
-              Multi-Source Synthesis Engine · v1.4
-            </span>
-          </div>
+      {/* ─── Hero Section with Grid Texture (Full-Bleed, Content in Container) ─── */}
+      <section className="relative w-full border-b border-[var(--border)] overflow-hidden bg-grid-subtle">
+        {/* Subtle radial mask over the grid */}
+        <div className="absolute inset-0 mask-hero-gradient pointer-events-none" />
 
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-[var(--text)] font-normal leading-[1.08] tracking-tight">
-            Research synthesis across papers, articles & video.{' '}
-            <span className="text-[var(--accent)] italic block sm:inline">
-              Not PDF chat.
-            </span>
-          </h1>
+        <Container className="py-20 lg:py-28 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+            {/* Left Column: Copy (7 cols) */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)]">
+                <span className="dot-live" />
+                <span className="eyebrow-label text-[var(--muted)]">
+                  Multi-Source Research Engine
+                </span>
+              </div>
 
-          <p className="font-body text-base sm:text-lg text-[var(--muted)] leading-relaxed max-w-xl">
-            Single-document chatbots answer one paper at a time in isolation.
-            ResearchPilot analyzes <em>across</em> your literature to isolate empirical
-            consensus, highlight direct contradictions, and surface latent connections—all grounded in verbatim cited passages.
-          </p>
+              <h1 className="h1-hero text-[var(--text)]">
+                Stop reading sources one by one.{' '}
+                <span className="text-[var(--accent)] italic block mt-1">
+                  See where they agree, clash, and connect.
+                </span>
+              </h1>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              onClick={onLaunchWorkspace}
-              className="btn-amber !py-3 !px-6 text-sm font-semibold"
-            >
-              <span>Open Research Workspace</span>
-              <span className="font-terminal">→</span>
-            </button>
+              <p className="font-body text-base sm:text-lg text-[var(--muted)] leading-relaxed max-w-xl">
+                Paste links to papers, articles and videos. ResearchPilot reads them together and shows you what they agree on, where they contradict each other, and the links you would have missed, with the exact quote behind every claim.
+              </p>
 
-            <button
-              onClick={onLoadBenchmark}
-              className="btn-terminal !py-3 !px-5 text-sm"
-              title="Instantly explore synthesis using the LLM scaling laws benchmark"
-            >
-              <span>Explore Benchmark Dataset</span>
-            </button>
-          </div>
-
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-[var(--border)] max-w-lg">
-            <div>
-              <span className="font-terminal text-xs text-[var(--muted)] block">SOURCES</span>
-              <span className="font-terminal text-lg font-bold text-[var(--text)]">ArXiv / Web / YT</span>
-            </div>
-            <div>
-              <span className="font-terminal text-xs text-[var(--muted)] block">TRIANGULATION</span>
-              <span className="font-terminal text-lg font-bold text-[var(--consensus)]">Cross-Document</span>
-            </div>
-            <div>
-              <span className="font-terminal text-xs text-[var(--muted)] block">GROUNDING</span>
-              <span className="font-terminal text-lg font-bold text-[var(--accent)]">Verbatim Quotes</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Live Animated Demo Panel (Fully Legible, No Faded Ghosting) */}
-        <div className="w-full lg:w-[540px] bg-[var(--surface)] border border-[var(--border)] rounded-sm shadow-2xl overflow-hidden flex flex-col">
-          {/* Mock Terminal Header */}
-          <div className="px-4 py-2.5 bg-[var(--surface-2)] border-b border-[var(--border)] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--border)]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--border)]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--border)]" />
-              <span className="font-terminal text-[0.65rem] text-[var(--muted)] ml-2 uppercase tracking-wider">
-                live_synthesis_stream.ts
-              </span>
-            </div>
-            <span className="font-terminal text-[0.65rem] text-[var(--accent)]">
-              {demoStep === 0 && 'STEP 1: INGESTING SOURCES...'}
-              {demoStep === 1 && 'STEP 2: EXTRACTING CLAIMS...'}
-              {demoStep === 2 && 'STEP 3: MAPPING CONSENSUS...'}
-              {demoStep === 3 && 'STEP 4: DETECTING CONTRADICTIONS...'}
-              {demoStep === 4 && 'STEP 5: SYNTHESIS COMPLETE'}
-            </span>
-          </div>
-
-          {/* Interactive Ingested Sources Strip */}
-          <div className="p-3 bg-[var(--surface-2)] border-b border-[var(--border-subtle)] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-terminal text-[0.62rem] text-[var(--muted)] uppercase tracking-wider">
-                Ingested Benchmark Corpus ({demoSources.length} sources)
-              </span>
-              <span className="font-terminal text-[0.62rem] text-[var(--consensus)]">ALL READY</span>
-            </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {demoSources.map((ds) => (
-                <div
-                  key={ds.index}
-                  className="p-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-xs text-left"
+              {/* CTAs: 44px uniform height */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-2">
+                <button
+                  onClick={onLaunchWorkspace}
+                  className="btn-primary"
                 >
-                  <div className="flex items-center gap-1">
-                    <SourceIndexBadge index={ds.index} />
-                    <span className="font-terminal text-[0.6rem] text-[var(--muted)] truncate">{ds.domain}</span>
-                  </div>
-                  <p className="text-[0.68rem] font-semibold text-[var(--text)] truncate mt-1">
-                    {ds.title}
-                  </p>
+                  <span>Start a research session</span>
+                  <span className="font-terminal font-bold">→</span>
+                </button>
+
+                <button
+                  onClick={onLoadBenchmark}
+                  className="btn-secondary"
+                  title="Explore with pre-loaded AI scaling benchmark"
+                >
+                  <span>See an example</span>
+                </button>
+              </div>
+
+              {/* Stat Strip: Ample width, zero awkward multi-line breaks */}
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-[var(--border)] max-w-xl">
+                <div>
+                  <span className="eyebrow-label text-[var(--text-dim)] block mb-1">SOURCES</span>
+                  <span className="font-terminal text-sm sm:text-base font-bold text-[var(--text)] whitespace-nowrap">
+                    ArXiv · Web · YouTube
+                  </span>
                 </div>
+                <div>
+                  <span className="eyebrow-label text-[var(--text-dim)] block mb-1">TRIANGULATION</span>
+                  <span className="font-terminal text-sm sm:text-base font-bold text-[var(--consensus)] whitespace-nowrap">
+                    Cross-Document
+                  </span>
+                </div>
+                <div>
+                  <span className="eyebrow-label text-[var(--text-dim)] block mb-1">GROUNDING</span>
+                  <span className="font-terminal text-sm sm:text-base font-bold text-[var(--accent)] whitespace-nowrap">
+                    Verbatim Quotes
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Live Synthesis Panel (5 cols) */}
+            <div className="lg:col-span-5 w-full">
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden flex flex-col">
+                {/* Panel Header */}
+                <div className="px-4 py-3 bg-[var(--surface-2)] border-b border-[var(--border)] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--border-focus)]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--border-focus)]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--border-focus)]" />
+                    <span className="font-terminal text-[0.68rem] text-[var(--muted)] ml-2 uppercase tracking-wider">
+                      live_synthesis.ts
+                    </span>
+                  </div>
+                  <span className="font-terminal text-[0.68rem] text-[var(--accent)] font-semibold">
+                    {demoStep === 0 && 'STEP 1: INGESTING SOURCES...'}
+                    {demoStep === 1 && 'STEP 2: EXTRACTING CLAIMS...'}
+                    {demoStep === 2 && 'STEP 3: MAPPING CONSENSUS...'}
+                    {demoStep === 3 && 'STEP 4: DETECTING CONFLICTS...'}
+                    {demoStep === 4 && 'STEP 5: SYNTHESIS COMPLETE'}
+                  </span>
+                </div>
+
+                {/* Ingested Sources Strip */}
+                <div className="p-3 bg-[var(--surface-2)] border-b border-[var(--border-subtle)] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-terminal text-[0.65rem] text-[var(--muted)] uppercase tracking-wider">
+                      Ingested Corpus ({demoSources.length} sources)
+                    </span>
+                    <span className="font-terminal text-[0.65rem] text-[var(--consensus)] font-semibold">ALL READY</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {demoSources.map((ds) => (
+                      <div
+                        key={ds.index}
+                        className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-md text-left"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <SourceIndexBadge index={ds.index} />
+                          <span className="font-terminal text-[0.62rem] text-[var(--muted)] truncate">{ds.domain}</span>
+                        </div>
+                        <p className="text-[0.7rem] font-semibold text-[var(--text)] truncate mt-1">
+                          {ds.title}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Revealed Cards (Fully legible, zero blur overlays) */}
+                <div className="p-4 space-y-3 min-h-[300px]">
+                  {/* Consensus Card */}
+                  <div
+                    className={`card-semantic card-consensus transition-all duration-300 space-y-2 ${
+                      demoStep >= 1 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Badge variant="consensus">CONSENSUS</Badge>
+                      <div className="flex items-center gap-1">
+                        <CitationChip sourceIndex={1} />
+                        <CitationChip sourceIndex={2} />
+                      </div>
+                    </div>
+                    <p className="font-body text-xs text-[var(--text)] font-semibold leading-relaxed">
+                      Both sources prove cross-entropy loss scales monotonically as a power law with compute.
+                    </p>
+                    <div className="text-[0.72rem] text-[var(--muted)] italic bg-[var(--surface-2)] p-2 rounded border border-[var(--border-subtle)]">
+                      <span className="font-terminal text-[var(--consensus)] not-italic font-bold">[S1 quote]: </span>
+                      "Loss scales as a power-law over 7 orders of magnitude in compute."
+                    </div>
+                  </div>
+
+                  {/* Contradiction Card */}
+                  <div
+                    className={`card-semantic card-contradiction transition-all duration-300 space-y-2 ${
+                      demoStep >= 2 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Badge variant="contradiction">CONTRADICTION</Badge>
+                      <div className="flex items-center gap-1">
+                        <CitationChip sourceIndex={1} />
+                        <CitationChip sourceIndex={2} />
+                      </div>
+                    </div>
+                    <p className="font-body text-xs text-[var(--text)] font-semibold leading-relaxed">
+                      Token vs parameter budget: Kaplan favors scaling parameters 3x faster, while Chinchilla proves strict 1:1 proportionality.
+                    </p>
+                    <div className="text-[0.72rem] text-[var(--muted)] italic bg-[var(--surface-2)] p-2 rounded border border-[var(--border-subtle)]">
+                      <span className="font-terminal text-[var(--contradiction)] not-italic font-bold">[S2 quote]: </span>
+                      "Current models are considerably undertrained; tokens and parameters must scale in equal 1:1 ratio."
+                    </div>
+                  </div>
+
+                  {/* Connection Card */}
+                  <div
+                    className={`card-semantic card-connection transition-all duration-300 space-y-2 ${
+                      demoStep >= 3 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Badge variant="connection">EMERGENT CONNECTION</Badge>
+                      <div className="flex items-center gap-1">
+                        <CitationChip sourceIndex={2} />
+                        <CitationChip sourceIndex={3} />
+                      </div>
+                    </div>
+                    <p className="font-body text-xs text-[var(--text)] font-semibold leading-relaxed">
+                      Continuous metric curves resolve why undertrained models produce sudden benchmark jumps.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bottom Status Bar */}
+                <div className="p-3 border-t border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-between text-xs">
+                  <span className="font-terminal text-[0.68rem] text-[var(--muted)]">
+                    Triangulated 3 sources in 1.4s
+                  </span>
+                  <button
+                    onClick={onLoadBenchmark}
+                    className="font-terminal text-[0.68rem] text-[var(--accent)] hover:underline cursor-pointer"
+                  >
+                    Open in workspace →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Trusted Sources Row under the Hero */}
+          <div className="pt-16 pb-4 border-t border-[var(--border)] mt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="eyebrow-label text-[var(--text-dim)] shrink-0">
+              SYNTHESIZE FROM ANY REPUTABLE SOURCE
+            </span>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-terminal text-[0.72rem] text-[var(--muted)]">
+              {trustedDomains.map((domain) => (
+                <span
+                  key={domain}
+                  className="px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--border-focus)] transition-colors"
+                >
+                  {domain}
+                </span>
               ))}
             </div>
           </div>
-
-          {/* Live Revealed Synthesis Cards (All 100% Legible, No blur overlays) */}
-          <div className="p-4 space-y-3 min-h-[300px]">
-            {/* Consensus Card */}
-            <div
-              className={`card-semantic card-consensus transition-all duration-300 space-y-2 ${
-                demoStep >= 1 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <Badge variant="consensus">CONSENSUS</Badge>
-                <div className="flex items-center gap-1">
-                  <CitationChip sourceIndex={1} />
-                  <CitationChip sourceIndex={2} />
-                </div>
-              </div>
-              <p className="font-body text-xs text-[var(--text)] font-semibold leading-relaxed">
-                Both sources independently prove that cross-entropy loss scales monotonically as a power law with compute.
-              </p>
-              <div className="text-[0.7rem] text-[var(--muted)] italic bg-[var(--surface-2)] p-2 rounded-xs border border-[var(--border-subtle)]">
-                <span className="font-terminal text-[var(--consensus)] not-italic font-bold">[S1 quote]: </span>
-                "Loss scales as a power-law over 7 orders of magnitude in compute."
-              </div>
-            </div>
-
-            {/* Contradiction Card */}
-            <div
-              className={`card-semantic card-contradiction transition-all duration-300 space-y-2 ${
-                demoStep >= 2 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <Badge variant="contradiction">CONTRADICTION</Badge>
-                <div className="flex items-center gap-1">
-                  <CitationChip sourceIndex={1} />
-                  <CitationChip sourceIndex={2} />
-                </div>
-              </div>
-              <p className="font-body text-xs text-[var(--text)] font-semibold leading-relaxed">
-                Conflict on token vs. parameter allocation: Kaplan favors scaling parameters 3x faster, while Chinchilla proves strict 1:1 proportionality.
-              </p>
-              <div className="text-[0.7rem] text-[var(--muted)] italic bg-[var(--surface-2)] p-2 rounded-xs border border-[var(--border-subtle)]">
-                <span className="font-terminal text-[var(--contradiction)] not-italic font-bold">[S2 quote]: </span>
-                "Current models are considerably undertrained; tokens and parameters must scale in equal 1:1 ratio."
-              </div>
-            </div>
-
-            {/* Connection Card */}
-            <div
-              className={`card-semantic card-connection transition-all duration-300 space-y-2 ${
-                demoStep >= 3 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <Badge variant="connection">EMERGENT CONNECTION</Badge>
-                <div className="flex items-center gap-1">
-                  <CitationChip sourceIndex={2} />
-                  <CitationChip sourceIndex={3} />
-                </div>
-              </div>
-              <p className="font-body text-xs text-[var(--text)] font-semibold leading-relaxed">
-                Continuous metric curves resolve the apparent mystery of why undertrained models produce non-linear benchmark jumps.
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Terminal Bar */}
-          <div className="p-3 border-t border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-between text-xs">
-            <span className="font-terminal text-[0.68rem] text-[var(--muted)]">
-              Triangulated 3 sources in 1.4s
-            </span>
-            <button
-              onClick={onLoadBenchmark}
-              className="font-terminal text-[0.68rem] text-[var(--accent)] hover:underline cursor-pointer"
-            >
-              Load full dataset in Workspace →
-            </button>
-          </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ─── 3-Step "How It Works" Strip ───────────────────────────── */}
-      <section className="border-y border-[var(--border)] bg-[var(--surface)] py-14">
-        <div className="max-w-[1200px] mx-auto px-6 space-y-10">
-          <div className="text-left space-y-1">
-            <span className="font-terminal text-xs text-[var(--accent)] uppercase tracking-wider">
-              Methodology
+      {/* ─── "How It Works" Section (Vertical Rhythm: 96px) ───────── */}
+      <section className="w-full border-b border-[var(--border)] bg-[var(--surface)] py-24">
+        <Container className="space-y-12">
+          {/* Eyebrow and H2 Heading */}
+          <div className="text-left space-y-2 max-w-2xl">
+            <span className="eyebrow-label text-[var(--accent)]">
+              HOW IT WORKS
             </span>
-            <h2 className="font-display text-2xl sm:text-3xl text-[var(--text)] font-normal">
-              How Cross-Source Triangulation Operates
+            <h2 className="h2-editorial text-[var(--text)]">
+              From a pile of links to a clear answer in three steps
             </h2>
           </div>
 
+          {/* 3 Step Cards: 24px padding, 12px radius, 1px border, hover lift */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Step 1 */}
-            <div className="p-6 bg-[var(--surface-2)] border border-[var(--border)] rounded-sm space-y-3 text-left">
+            {/* Step 01 */}
+            <div className="card-standard space-y-4 text-left">
               <span className="font-terminal text-xs text-[var(--accent)] font-bold">
-                01 / INGESTION
+                01
               </span>
-              <h3 className="font-display text-lg text-[var(--text)] font-semibold">
-                Multi-Modal Ingestion
+              <h3 className="h3-editorial text-[var(--text)]">
+                Drop in your sources
               </h3>
-              <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-                Paste URLs across ArXiv papers, academic journals, investigative articles, or YouTube lectures. Structured extraction isolates methodology, datasets, and claims automatically.
+              <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
+                Paste links to papers, articles or YouTube videos. We handle the scraping, transcript extraction, and structured parsing automatically.
               </p>
             </div>
 
-            {/* Step 2 */}
-            <div className="p-6 bg-[var(--surface-2)] border border-[var(--border)] rounded-sm space-y-3 text-left">
+            {/* Step 02 */}
+            <div className="card-standard space-y-4 text-left">
               <span className="font-terminal text-xs text-[var(--consensus)] font-bold">
-                02 / TRIANGULATION
+                02
               </span>
-              <h3 className="font-display text-lg text-[var(--text)] font-semibold">
-                Cross-Document Triangulation
+              <h3 className="h3-editorial text-[var(--text)]">
+                Compare them side by side
               </h3>
-              <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-                Rather than treating each text as a silo, our cross-reference engine compares claims across every source to detect where empirical findings align and where methodologies clash.
+              <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
+                We find agreements, contradictions and hidden connections across all of them—highlighting where evidence converges and where methodologies clash.
               </p>
             </div>
 
-            {/* Step 3 */}
-            <div className="p-6 bg-[var(--surface-2)] border border-[var(--border)] rounded-sm space-y-3 text-left">
+            {/* Step 03 */}
+            <div className="card-standard space-y-4 text-left">
               <span className="font-terminal text-xs text-[var(--connection)] font-bold">
-                03 / PROVENANCE
+                03
               </span>
-              <h3 className="font-display text-lg text-[var(--text)] font-semibold">
-                Exact Verbatim Grounding
+              <h3 className="h3-editorial text-[var(--text)]">
+                Check every claim
               </h3>
-              <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-                Zero hallucinated summaries. Every consensus point, contradiction row, and graph edge links directly to verbatim quoted passages from the original source with 1-click inspection.
+              <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
+                Click any claim to see the exact passage it came from. No guesses, no made-up summaries, and full verbatim provenance for every point.
               </p>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ─── Call to Action Strip ─────────────────────────────────── */}
-      <section className="py-16 text-center max-w-3xl mx-auto px-6 space-y-6">
-        <h2 className="font-display text-3xl sm:text-4xl text-[var(--text)] font-normal">
-          Synthesize your research in minutes.
-        </h2>
-        <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
-          Replace tedious manual note-taking and fragmented single-PDF chats with structured, cross-source empirical synthesis.
-        </p>
-        <div className="flex justify-center gap-3">
-          <button
-            onClick={onLaunchWorkspace}
-            className="btn-amber !py-3 !px-8 text-sm"
-          >
-            Launch Research Workspace
-          </button>
-        </div>
+      {/* ─── Final CTA Section (96px Vertical Rhythm) ─────────────── */}
+      <section className="w-full py-24 bg-[var(--bg)]">
+        <Container className="text-center max-w-3xl space-y-8">
+          <h2 className="h2-editorial text-[var(--text)]">
+            Your next literature review, done in minutes.
+          </h2>
+          <p className="text-base text-[var(--muted)] leading-relaxed font-body max-w-xl mx-auto">
+            Say goodbye to fragmented notes and 100 open browser tabs. Get clear, grounded synthesis across your entire reading list.
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={onLaunchWorkspace}
+              className="btn-primary"
+            >
+              <span>Start a research session</span>
+              <span className="font-terminal font-bold">→</span>
+            </button>
+          </div>
+        </Container>
       </section>
+
+      {/* Full-Bleed Footer */}
+      <Footer onRouteChange={onRouteChange} />
     </div>
   );
 }

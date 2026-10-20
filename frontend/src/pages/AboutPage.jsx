@@ -1,125 +1,115 @@
-export function AboutPage({ onLaunchWorkspace }) {
+import { Container } from '../components/ui/Container';
+import { Footer } from '../components/Footer';
+
+export function AboutPage({ onLaunchWorkspace, onRouteChange }) {
   return (
-    <div className="flex-1 overflow-y-auto bg-[var(--bg)] p-6 max-w-4xl mx-auto space-y-10 py-10">
-      {/* Title */}
-      <div className="space-y-3 border-b border-[var(--border)] pb-6">
-        <span className="font-terminal text-xs text-[var(--accent)] uppercase tracking-wider">
-          System Architecture & Philosophy
-        </span>
-        <h1 className="font-display text-3xl sm:text-4xl text-[var(--text)] font-semibold">
-          Why Literature Synthesis Demands Cross-Document Triangulation
-        </h1>
-        <p className="font-body text-sm sm:text-base text-[var(--muted)] leading-relaxed">
-          The prevailing paradigm in AI research tools is conversational search over isolated PDFs.
-          This document outlines why single-document retrieval fails for serious literature analysis,
-          and how ResearchPilot’s multi-source synthesis pipeline operates.
-        </p>
-      </div>
-
-      {/* The Core Thesis */}
-      <section className="space-y-4">
-        <h2 className="font-display text-xl text-[var(--text)] font-semibold">
-          1. The Failure Mode of "Chat with PDF"
-        </h2>
-        <div className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-sm space-y-3 text-xs font-body text-[var(--muted)] leading-relaxed">
-          <p>
-            When a researcher interrogates a single paper through a chat interface, the LLM is constrained to the biases, sample limitations, and unchecked assumptions of that singular author.
-          </p>
-          <p>
-            Real scientific progress does not happen inside individual papers; it occurs at the <strong className="text-[var(--text)]">friction points between papers</strong>—where one lab’s replication fails, where two methodologies disagree on sample scaling, or where disparate disciplines discover parallel mathematical formalisms.
+    <div className="flex-1 overflow-y-auto bg-[var(--bg)] py-10">
+      <Container className="space-y-12 max-w-4xl">
+        {/* Title & Introduction */}
+        <div className="space-y-3 border-b border-[var(--border)] pb-8 text-left">
+          <span className="eyebrow-label text-[var(--accent)]">
+            HOW IT WORKS
+          </span>
+          <h1 className="h2-editorial text-[var(--text)]">
+            Why reading papers together beats chatting with one PDF
+          </h1>
+          <p className="font-body text-base text-[var(--muted)] leading-relaxed">
+            Standard AI tools ask questions to one document at a time. But in real research, the most valuable insights live in the space between papers—where two studies contradict each other, where findings align, or where one lab's method explains another's results.
           </p>
         </div>
-      </section>
 
-      {/* Architecture Pipeline */}
-      <section className="space-y-4">
-        <h2 className="font-display text-xl text-[var(--text)] font-semibold">
-          2. The ResearchPilot Pipeline
-        </h2>
-
-        <div className="space-y-3">
-          <div className="p-4 bg-[var(--surface)] border-l-[3px] border-l-[var(--accent)] border border-[var(--border)] rounded-sm space-y-1.5">
-            <span className="font-terminal text-xs text-[var(--accent)] uppercase tracking-wider block">
-              Stage 1: Multi-Modal Ingestion & Normalization
-            </span>
-            <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-              Trafilatura extracts body text while filtering boilerplates. YouTube transcripts are parsed with timestamped token spans. ArXiv preprints are structured into abstract, methodology, and empirical claims.
+        {/* Section 1 */}
+        <section className="space-y-4 text-left">
+          <h2 className="h3-editorial text-[var(--text)]">
+            The problem with single-document chat
+          </h2>
+          <div className="card-standard space-y-3 text-sm text-[var(--muted)] font-body leading-relaxed">
+            <p>
+              When you ask an AI to summarize a single paper, it only knows what that author chose to report. It cannot flag that another lab tried the same experiment and failed, or that a 2024 paper overturned a 2020 assumption.
+            </p>
+            <p>
+              ResearchPilot was built specifically to read a <strong className="text-[var(--text)]">collection of sources at once</strong>, comparing every claim across the group.
             </p>
           </div>
+        </section>
 
-          <div className="p-4 bg-[var(--surface)] border-l-[3px] border-l-[var(--consensus)] border border-[var(--border)] rounded-sm space-y-1.5">
-            <span className="font-terminal text-xs text-[var(--consensus)] uppercase tracking-wider block">
-              Stage 2: Cross-Source Triangulation
-            </span>
-            <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-              Structured prompts compare pairs and triplets of sources simultaneously. Rather than summarizing, the engine identifies pairwise consensus, direct contradictions, and latent connections.
+        {/* Section 2: Pipeline Breakdown */}
+        <section className="space-y-6 text-left">
+          <h2 className="h3-editorial text-[var(--text)]">
+            How ResearchPilot synthesizes your links
+          </h2>
+
+          <div className="space-y-4">
+            <div className="card-semantic card-consensus space-y-2">
+              <span className="eyebrow-label text-[var(--consensus)]">
+                01 / FINDING AGREEMENTS
+              </span>
+              <h3 className="font-body font-semibold text-base text-[var(--text)]">
+                Isolating true consensus
+              </h3>
+              <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
+                We compare claims across every source to identify where authors independently reach the exact same conclusion or replicate the same effect.
+              </p>
+            </div>
+
+            <div className="card-semantic card-contradiction space-y-2">
+              <span className="eyebrow-label text-[var(--contradiction)]">
+                02 / SPOTTING CONFLICTS
+              </span>
+              <h3 className="font-body font-semibold text-base text-[var(--text)]">
+                Surfacing contradictions early
+              </h3>
+              <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
+                When studies report conflicting numbers, divergent sample sizes, or opposing theoretical models, we put them side by side so you can evaluate the disagreement.
+              </p>
+            </div>
+
+            <div className="card-semantic card-connection space-y-2">
+              <span className="eyebrow-label text-[var(--connection)]">
+                03 / UNCOVERING CONNECTIONS
+              </span>
+              <h3 className="font-body font-semibold text-base text-[var(--text)]">
+                Connecting the dots
+              </h3>
+              <p className="text-sm text-[var(--muted)] leading-relaxed font-body">
+                Non-obvious links, such as a mathematical formulation from one paper explaining a mysterious benchmark jump in another, are surfaced as emergent insights.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: Grounded Proof */}
+        <section className="space-y-4 text-left">
+          <h2 className="h3-editorial text-[var(--text)]">
+            100% grounded in exact quotes
+          </h2>
+          <div className="card-standard space-y-3 text-sm text-[var(--muted)] font-body leading-relaxed">
+            <p>
+              Every claim on ResearchPilot comes with clickable citation chips like <span className="citation-chip">[S1]</span> and <span className="citation-chip">[S2]</span>.
+            </p>
+            <p>
+              Clicking any chip opens the Evidence Drawer showing the exact sentences quoted directly from the source. No vague paraphrases, and no fabricated citations.
             </p>
           </div>
+        </section>
 
-          <div className="p-4 bg-[var(--surface)] border-l-[3px] border-l-[var(--contradiction)] border border-[var(--border)] rounded-sm space-y-1.5">
-            <span className="font-terminal text-xs text-[var(--contradiction)] uppercase tracking-wider block">
-              Stage 3: Verbatim Grounding & Passage Provenance
-            </span>
-            <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-              Every synthesized claim is bound to an exact cited passage mapped directly back to the original text. Hallucinations are mitigated through mandatory quotation verification.
-            </p>
-          </div>
-
-          <div className="p-4 bg-[var(--surface)] border-l-[3px] border-l-[var(--connection)] border border-[var(--border)] rounded-sm space-y-1.5">
-            <span className="font-terminal text-xs text-[var(--connection)] uppercase tracking-wider block">
-              Stage 4: Topology & Dimensional Matrix
-            </span>
-            <p className="text-xs text-[var(--muted)] leading-relaxed font-body">
-              Findings are projected into an interactive topological graph and a comparative matrix across dimensions like sample size, empirical effect, and dataset scope.
-            </p>
-          </div>
+        {/* CTA */}
+        <div className="pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <span className="font-terminal text-xs text-[var(--text-dim)]">
+            Ready to try it on your papers?
+          </span>
+          <button
+            onClick={onLaunchWorkspace}
+            className="btn-primary"
+          >
+            <span>Start a research session</span>
+            <span className="font-terminal font-bold">→</span>
+          </button>
         </div>
-      </section>
+      </Container>
 
-      {/* Strict Semantic Color Specification */}
-      <section className="space-y-3">
-        <h2 className="font-display text-xl text-[var(--text)] font-semibold">
-          3. Semantic Token Uniformity
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 bg-[var(--surface)] border border-[var(--border)] border-l-[3px] border-l-[var(--consensus)] rounded-sm">
-            <span className="font-terminal text-xs text-[var(--consensus)] font-bold block">
-              --consensus: #3DDC97
-            </span>
-            <p className="text-[0.72rem] text-[var(--muted)] mt-1">
-              Applied universally to agreement badges, graph nodes, and verified claims.
-            </p>
-          </div>
-          <div className="p-3 bg-[var(--surface)] border border-[var(--border)] border-l-[3px] border-l-[var(--contradiction)] rounded-sm">
-            <span className="font-terminal text-xs text-[var(--contradiction)] font-bold block">
-              --contradiction: #FF6B5E
-            </span>
-            <p className="text-[0.72rem] text-[var(--muted)] mt-1">
-              Applied to opposing positions, divergent matrix cells, and tension points.
-            </p>
-          </div>
-          <div className="p-3 bg-[var(--surface)] border border-[var(--border)] border-l-[3px] border-l-[var(--connection)] rounded-sm">
-            <span className="font-terminal text-xs text-[var(--connection)] font-bold block">
-              --connection: #4CC9F0
-            </span>
-            <p className="text-[0.72rem] text-[var(--muted)] mt-1">
-              Applied to emergent bridges, relational edges, and cross-domain links.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <div className="pt-4 border-t border-[var(--border)] flex justify-between items-center">
-        <span className="font-terminal text-xs text-[var(--text-dim)]">
-          Built for rigorous literature review.
-        </span>
-        <button
-          onClick={onLaunchWorkspace}
-          className="btn-amber !py-2 !px-4 text-xs"
-        >
-          Open Workspace →
-        </button>
-      </div>
+      {/* Full-bleed Footer */}
+      <Footer onRouteChange={onRouteChange} />
     </div>
   );
 }

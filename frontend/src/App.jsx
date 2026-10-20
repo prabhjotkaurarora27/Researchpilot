@@ -18,7 +18,7 @@ export default function App() {
 
   const [isExtracting, setIsExtracting] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('SYSTEM READY');
+  const [statusMessage, setStatusMessage] = useState('All systems running');
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -159,9 +159,8 @@ export default function App() {
     const titleMap = {
       landing: 'ResearchPilot — Research Synthesis, Not PDF Chat',
       workspace: 'Workspace — ResearchPilot',
-      library: 'Library — ResearchPilot',
-      history: 'History — ResearchPilot',
-      about: 'Architecture — ResearchPilot',
+      library: 'Your Research — ResearchPilot',
+      about: 'How It Works — ResearchPilot',
     };
     document.title = titleMap[currentRoute] || 'ResearchPilot';
   }, [currentRoute]);
@@ -199,6 +198,7 @@ export default function App() {
               }
             }}
             onLoadBenchmark={handleLoadBenchmark}
+            onRouteChange={setCurrentRoute}
           />
         )}
 
@@ -219,12 +219,13 @@ export default function App() {
           />
         )}
 
-        {(currentRoute === 'library' || currentRoute === 'history') && (
+        {currentRoute === 'library' && (
           <LibraryPage
             onOpenSession={() => {
               handleLoadBenchmark();
             }}
             onLoadBenchmark={handleLoadBenchmark}
+            onRouteChange={setCurrentRoute}
           />
         )}
 
@@ -237,6 +238,7 @@ export default function App() {
                 setCurrentRoute('workspace');
               }
             }}
+            onRouteChange={setCurrentRoute}
           />
         )}
       </main>

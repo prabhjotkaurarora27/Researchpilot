@@ -127,7 +127,7 @@ export function SourcesPanel({
           <button
             onClick={handleExtract}
             disabled={isExtracting || !urlInput.trim()}
-            className="btn-amber !py-1 !px-3 text-xs"
+            className="btn-primary !h-8 !px-3 !text-xs !rounded-sm font-terminal"
           >
             {isExtracting ? 'Extracting...' : 'Extract Sources'}
           </button>

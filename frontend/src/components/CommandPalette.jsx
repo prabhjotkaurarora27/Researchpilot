@@ -63,20 +63,10 @@ export function CommandPalette({
       },
     },
     {
-      id: 'go-history',
-      title: 'Go to History',
+      id: 'go-about',
+      title: 'How It Works',
       category: 'Navigation',
       shortcut: 'G H',
-      run: () => {
-        onRouteChange?.('history');
-        onClose?.();
-      },
-    },
-    {
-      id: 'go-about',
-      title: 'View Architecture & Synthesis Pipeline',
-      category: 'Navigation',
-      shortcut: 'G A',
       run: () => {
         onRouteChange?.('about');
         onClose?.();

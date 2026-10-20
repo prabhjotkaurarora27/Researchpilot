@@ -1,4 +1,5 @@
 import { cn } from '../lib/utils';
+import { Container } from './ui/Container';
 
 export function TopBar({
   currentRoute = 'workspace',
@@ -7,24 +8,23 @@ export function TopBar({
   onOpenCommandPalette,
   onOpenShortcuts,
   isProcessing = false,
-  statusMessage = 'SYSTEM READY',
+  statusMessage = 'All systems running',
   sourcesCount = 0,
 }) {
   const navItems = [
     { id: 'workspace', label: 'Workspace' },
     { id: 'library', label: 'Library' },
-    { id: 'history', label: 'History' },
-    { id: 'about', label: 'Architecture' },
+    { id: 'about', label: 'How it works' },
   ];
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[var(--surface)] border-b border-[var(--border)] select-none">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
+      <Container className="h-14 flex items-center justify-between gap-4">
         {/* Left: Brand & Status Pill */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 shrink-0">
           <button
             onClick={() => onRouteChange?.('landing')}
-            className="flex items-center gap-2 group text-left cursor-pointer"
+            className="flex items-center gap-2.5 group text-left cursor-pointer"
             title="Return to Home"
           >
             <span className="font-terminal text-xs tracking-[0.2em] font-bold text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
@@ -32,16 +32,16 @@ export function TopBar({
             </span>
           </button>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-[var(--surface-2)] border border-[var(--border)]">
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[var(--surface-2)] border border-[var(--border)]">
             <span className={isProcessing ? 'dot-amber' : 'dot-live'} />
-            <span className="font-terminal text-[0.62rem] text-[var(--muted)] font-medium uppercase tracking-wider">
-              {isProcessing ? 'PROCESSING' : 'LIVE'}
+            <span className="font-terminal text-[0.65rem] text-[var(--muted)] font-medium tracking-wide">
+              {isProcessing ? 'PROCESSING' : statusMessage}
             </span>
           </div>
         </div>
 
-        {/* Center: Navigation Links with Amber Underline */}
-        <nav className="flex items-center gap-1 sm:gap-6" aria-label="Main Navigation">
+        {/* Center: Navigation Links (Vertically aligned and centered) */}
+        <nav className="flex items-center gap-1 sm:gap-8" aria-label="Main Navigation">
           {navItems.map((item) => {
             const isActive = currentRoute === item.id;
             return (
@@ -49,7 +49,7 @@ export function TopBar({
                 key={item.id}
                 onClick={() => onRouteChange?.(item.id)}
                 className={cn(
-                  'relative py-3 px-2 font-terminal text-[0.72rem] tracking-wide uppercase transition-colors',
+                  'relative py-4 px-2 font-terminal text-[0.75rem] tracking-wide uppercase transition-colors',
                   isActive
                     ? 'text-[var(--text)] font-semibold'
                     : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -65,32 +65,25 @@ export function TopBar({
           })}
         </nav>
 
-        {/* Right: Shortcuts, Command Palette & New Research */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right: Sources Count, Search/Cmd+K & New Session Action */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Sources Count Badge if active */}
           {sourcesCount > 0 && (
-            <span className="hidden md:inline-flex items-center gap-1 font-terminal text-[0.65rem] text-[var(--muted)] bg-[var(--surface-2)] px-2 py-0.5 rounded-sm border border-[var(--border)]">
+            <span className="hidden md:inline-flex items-center gap-1 font-terminal text-[0.68rem] text-[var(--muted)] bg-[var(--surface-2)] px-2.5 py-1 rounded-sm border border-[var(--border)]">
               <span className="text-[var(--accent)] font-semibold">{sourcesCount}</span>
               <span>sources</span>
-            </span>
-          )}
-
-          {/* Status Message in Mono */}
-          {statusMessage && (
-            <span className="hidden lg:inline-block font-terminal text-[0.65rem] text-[var(--text-dim)] truncate max-w-[200px]">
-              {statusMessage}
             </span>
           )}
 
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
-            className="btn-terminal !py-1 !px-2 hidden sm:flex items-center gap-1.5"
+            className="btn-secondary !h-8 !px-2.5 hidden sm:flex items-center gap-1.5 !text-xs !rounded-sm"
             title="Search and commands (Cmd/Ctrl + K)"
             aria-label="Open command palette"
           >
-            <span className="text-[var(--muted)]">Search</span>
-            <kbd className="font-terminal text-[0.6rem] bg-[var(--surface-2)] text-[var(--text-dim)] px-1 py-0.2 rounded border border-[var(--border)]">
+            <span className="text-[var(--muted)] font-terminal text-[0.72rem]">Search</span>
+            <kbd className="font-terminal text-[0.62rem] bg-[var(--surface-2)] text-[var(--text-dim)] px-1 py-0.2 rounded border border-[var(--border)]">
               ⌘K
             </kbd>
           </button>
@@ -105,17 +98,17 @@ export function TopBar({
             <span className="font-terminal text-xs">?</span>
           </button>
 
-          {/* New Research Amber Button */}
+          {/* New Research Button */}
           <button
             onClick={onNewResearch}
-            className="btn-amber !py-1 !px-2.5 text-xs font-semibold"
+            className="btn-primary !h-8 !px-3 !text-xs !rounded-sm font-terminal"
             aria-label="Start New Research"
           >
-            <span className="font-terminal font-bold">+</span>
+            <span className="font-bold">+</span>
             <span>New Research</span>
           </button>
         </div>
-      </div>
+      </Container>
 
       {/* Thin Amber Progress Line when processing */}
       {isProcessing && <div className="progress-line-amber" role="progressbar" aria-label="Loading synthesis" />}

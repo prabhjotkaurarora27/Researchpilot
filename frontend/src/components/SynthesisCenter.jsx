@@ -63,7 +63,7 @@ export function SynthesisCenter({
           <button
             onClick={onRunSynthesis}
             disabled={doneSources.length < 2 || isSynthesizing}
-            className="btn-amber !py-1 !px-2.5 text-xs whitespace-nowrap"
+            className="btn-primary !h-8 !px-3 !text-xs !rounded-sm font-terminal whitespace-nowrap"
             title="Cross-reference all loaded sources for consensus and contradictions"
           >
             {isSynthesizing ? 'Synthesizing...' : 'Synthesize Now'}
