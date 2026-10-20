@@ -7,6 +7,8 @@ import json
 import os
 from pathlib import Path
 
+from .embeddings import EmbeddingStore
+
 DB_PATH = Path(__file__).parent / "researchpilot.db"
 
 
@@ -167,12 +169,64 @@ async def save_source_to_kb(source_id: int, tags: list[str], topic_cluster: str 
                 (source_id, json.dumps(tags), topic_cluster),
             )
         await db.commit()
+
+        # Add to embedding index
+        source = await get_source(source_id)
+        if source:
+            store = EmbeddingStore.get()
+            store.add(source_id, source)
     finally:
         await db.close()
 
 
 async def search_saved_sources(query: str, tags: list[str] = None) -> list[dict]:
-    """Search saved sources by text content and optional tags."""
+    """Search saved sources using semantic similarity + optional tag filter."""
+    store = EmbeddingStore.get()
+    semantic_results = store.search(query, top_k=20)
+
+    if not semantic_results:
+        # Fallback to keyword search if index is empty
+        return await _keyword_search(query, tags)
+
+    # Fetch the matched sources from DB
+    matched_ids = [sid for sid, _score in semantic_results]
+    scores_map = {sid: score for sid, score in semantic_results}
+
+    db = await get_db()
+    try:
+        placeholders = ",".join("?" * len(matched_ids))
+        cursor = await db.execute(f"""
+            SELECT s.*, ss.tags as saved_tags, ss.topic_cluster
+            FROM sources s
+            JOIN saved_sources ss ON s.id = ss.source_id
+            WHERE s.id IN ({placeholders})
+        """, matched_ids)
+        rows = await cursor.fetchall()
+
+        results = []
+        for row in rows:
+            d = _row_to_dict(row)
+            d["saved_tags"] = json.loads(row["saved_tags"]) if row["saved_tags"] else []
+            d["topic_cluster"] = row["topic_cluster"] or ""
+            d["relevance_score"] = round(scores_map.get(d["id"], 0), 4)
+
+            # Filter by tags if provided
+            if tags:
+                source_tags = d.get("saved_tags", [])
+                if not any(t in source_tags for t in tags):
+                    continue
+
+            results.append(d)
+
+        # Sort by relevance score descending
+        results.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+        return results
+    finally:
+        await db.close()
+
+
+async def _keyword_search(query: str, tags: list[str] = None) -> list[dict]:
+    """Fallback keyword search when embedding index is empty."""
     db = await get_db()
     try:
         sql = """

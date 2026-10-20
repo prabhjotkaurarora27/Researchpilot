@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from .database import (
     init_db,
@@ -21,7 +22,9 @@ from .database import (
 from .scraper import scrape_url, extract_domain
 from .extractor import extract_source_data
 from .synthesizer import synthesize_sources, compare_sources
-from .chat import chat_with_sources
+from .chat import chat_with_sources, chat_with_sources_stream
+from .embeddings import EmbeddingStore
+from .credibility import score_credibility
 from .models import (
     SourceInput,
     SynthesisRequest,
@@ -34,8 +37,17 @@ from .models import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
+    """Initialize database and embedding index on startup."""
     await init_db()
+    # Rebuild FAISS index from existing saved sources
+    try:
+        saved = await get_all_saved_sources()
+        if saved:
+            store = EmbeddingStore.get()
+            store.rebuild(saved)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Could not rebuild embedding index: {e}")
     yield
 
 
@@ -105,6 +117,13 @@ async def extract_sources(input_data: SourceInput):
         # Extract structured data via LLM
         extracted = extract_source_data(raw_content, url, scraped_title)
 
+        # Score credibility
+        credibility = score_credibility(
+            domain,
+            extracted.get("publish_date", ""),
+            extracted.get("source_type", ""),
+        )
+
         await update_source(
             source_id,
             raw_content=raw_content,
@@ -120,6 +139,7 @@ async def extract_sources(input_data: SourceInput):
             "raw_content": raw_content[:500] + "..." if len(raw_content) > 500 else raw_content,
             "status": "done",
             "extracted_data": extracted,
+            "credibility": credibility,
         })
 
     return {"sources": results}
@@ -174,6 +194,26 @@ async def chat(request: ChatRequest):
     history = [{"role": m.role, "content": m.content} for m in request.history]
     result = chat_with_sources(request.message, sources, history)
     return result
+
+
+@app.post("/api/chat/stream")
+async def chat_stream(request: ChatRequest):
+    """Chat with streaming SSE responses from sources."""
+    sources = await get_sources(request.source_ids)
+    if not sources:
+        raise HTTPException(status_code=400, detail="No sources provided")
+
+    history = [{"role": m.role, "content": m.content} for m in request.history]
+
+    return StreamingResponse(
+        chat_with_sources_stream(request.message, sources, history),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ─── Knowledge Base ──────────────────────────────────────────────

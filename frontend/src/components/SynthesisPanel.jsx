@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { synthesize } from '../hooks/useApi';
 import ConsensusView from './ConsensusView';
 import SummaryView from './SummaryView';
 import CompareView from './CompareView';
@@ -10,38 +9,28 @@ const TABS = [
   { key: 'synthesis', label: 'Synthesis' },
   { key: 'summary', label: 'Summary' },
   { key: 'compare', label: 'Compare' },
-  { key: 'chat', label: 'Chat' },
   { key: 'kb', label: 'Library' },
 ];
 
 /**
- * Right panel: tabbed synthesis/comparison/chat interface.
+ * Right panel: tabbed synthesis/comparison interface + embedded chat below.
+ * Chat is no longer a tab — it lives inline below the synthesis board.
+ * Synthesis state is managed by the parent (App.jsx) for auto-trigger.
  */
-export default function SynthesisPanel({ sources, onCitationClick }) {
+export default function SynthesisPanel({
+  sources,
+  synthesisData,
+  isSynthesizing,
+  onCitationClick,
+}) {
   const [activeTab, setActiveTab] = useState('synthesis');
-  const [synthesisData, setSynthesisData] = useState(null);
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
 
   const doneSources = sources.filter((s) => s.status === 'done');
-
-  const handleSynthesize = async () => {
-    if (doneSources.length < 2) return;
-
-    setIsSynthesizing(true);
-    try {
-      const result = await synthesize(doneSources.map((s) => s.id));
-      setSynthesisData(result);
-    } catch (err) {
-      console.error('Synthesis error:', err);
-      alert(`Synthesis failed: ${err.message}`);
-    } finally {
-      setIsSynthesizing(false);
-    }
-  };
+  const suggestedQuestions = synthesisData?.suggested_questions || [];
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-bg-base)]">
-      {/* Tab Bar + Synthesize Button */}
+      {/* Tab Bar */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)]">
         <div className="tab-bar border-b-0">
           {TABS.map(({ key, label }) => (
@@ -55,20 +44,6 @@ export default function SynthesisPanel({ sources, onCitationClick }) {
             </button>
           ))}
         </div>
-
-        {/* Synthesize Button */}
-        {(activeTab === 'synthesis' || activeTab === 'summary') && doneSources.length >= 2 && (
-          <div className="pr-3">
-            <button
-              id="synthesize-btn"
-              className="btn-primary"
-              onClick={handleSynthesize}
-              disabled={isSynthesizing}
-            >
-              {isSynthesizing ? 'Synthesizing…' : synthesisData ? 'Re-synthesize' : 'Synthesize'}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Loading State */}
@@ -85,31 +60,38 @@ export default function SynthesisPanel({ sources, onCitationClick }) {
         </div>
       )}
 
-      {/* Tab Content */}
-      <div className="flex-1 overflow-hidden">
-        {activeTab === 'synthesis' && (
-          <ConsensusView
-            synthesis={synthesisData}
-            onCitationClick={onCitationClick}
-          />
-        )}
-        {activeTab === 'summary' && (
-          <SummaryView
-            synthesis={synthesisData}
-            onCitationClick={onCitationClick}
-          />
-        )}
-        {activeTab === 'compare' && (
-          <CompareView sources={sources} />
-        )}
-        {activeTab === 'chat' && (
+      {/* Tab Content — takes remaining space */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'synthesis' && (
+            <ConsensusView
+              synthesis={synthesisData}
+              sources={doneSources}
+              onCitationClick={onCitationClick}
+            />
+          )}
+          {activeTab === 'summary' && (
+            <SummaryView
+              synthesis={synthesisData}
+              sources={doneSources}
+              onCitationClick={onCitationClick}
+            />
+          )}
+          {activeTab === 'compare' && (
+            <CompareView sources={sources} />
+          )}
+          {activeTab === 'kb' && (
+            <KnowledgeBase sources={sources} />
+          )}
+        </div>
+
+        {/* Embedded Chat — always visible below the board on synthesis/summary tabs */}
+        {(activeTab === 'synthesis' || activeTab === 'summary') && doneSources.length >= 2 && (
           <ChatView
             sources={sources}
             onCitationClick={onCitationClick}
+            suggestedQuestions={suggestedQuestions}
           />
-        )}
-        {activeTab === 'kb' && (
-          <KnowledgeBase sources={sources} />
         )}
       </div>
     </div>

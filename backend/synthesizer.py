@@ -6,7 +6,7 @@ import json
 from .extractor import get_client
 
 
-SYNTHESIS_PROMPT = """You are a research synthesis expert. You are given extracted data from multiple sources. Your job is to analyze ACROSS these sources and identify:
+SYNTHESIS_PROMPT = """You are a research synthesis expert. You are given extracted data from multiple sources along with their full content. Your job is to analyze ACROSS these sources and identify:
 
 1. **Consensus**: Where sources agree on claims or findings
 2. **Contradictions**: Where sources conflict or present opposing views
@@ -15,18 +15,29 @@ SYNTHESIS_PROMPT = """You are a research synthesis expert. You are given extract
 Sources:
 {sources_json}
 
-Produce a synthesis in the following JSON format. Each point must include "citations" — a list of source indices (1-based) that support the point. Write the synthesis so that an inline citation like [Source 1] or [Source 3] appears naturally in the text.
+Produce a synthesis in the following JSON format. Each point must include:
+- "citations" — a list of source indices (1-based) that support the point
+- "citation_passages" — a JSON object mapping each cited source number (as a string key) to the EXACT passage (1-3 sentences) quoted verbatim from that source that supports the claim. These must be real quotes from the source content, not paraphrases.
+
+Write the synthesis so that an inline citation like [Source 1] or [Source 3] appears naturally in the text.
+
+Also generate 2-3 "suggested_questions" — insightful follow-up questions a researcher would want to ask, derived from the contradictions and connections found. Frame them as specific questions referencing the source numbers, e.g. "Why do Source 1 and Source 3 disagree on X?"
 
 Return ONLY valid JSON:
 {{
   "consensus": [
-    {{"point": "Statement where sources agree [Source 1] [Source 3]", "citations": [1, 3], "explanation": "Why this agreement matters"}}
+    {{"point": "Statement where sources agree [Source 1] [Source 3]", "citations": [1, 3], "citation_passages": {{"1": "Exact verbatim passage from source 1...", "3": "Exact verbatim passage from source 3..."}}, "explanation": "Why this agreement matters"}}
   ],
   "contradictions": [
-    {{"point": "Statement where sources conflict [Source 1] vs [Source 2]", "citations": [1, 2], "explanation": "Nature of the disagreement"}}
+    {{"point": "Statement where sources conflict [Source 1] vs [Source 2]", "citations": [1, 2], "citation_passages": {{"1": "Exact verbatim passage from source 1...", "2": "Exact verbatim passage from source 2..."}}, "explanation": "Nature of the disagreement"}}
   ],
   "connections": [
-    {{"point": "Non-obvious connection or pattern across sources [Source 2] [Source 4]", "citations": [2, 4], "explanation": "Why this connection is interesting"}}
+    {{"point": "Non-obvious connection or pattern across sources [Source 2] [Source 4]", "citations": [2, 4], "citation_passages": {{"2": "Exact verbatim passage from source 2...", "4": "Exact verbatim passage from source 4..."}}, "explanation": "Why this connection is interesting"}}
+  ],
+  "suggested_questions": [
+    "Why do Source 1 and Source 2 disagree on X?",
+    "How does the finding in Source 3 relate to Source 1's methodology?",
+    "What evidence supports Source 2's claim over Source 4's?"
   ],
   "summary_oneline": "A single sentence capturing the overall synthesis across all sources",
   "summary_paragraph": "A 3-5 sentence paragraph synthesizing the key findings, with inline [Source N] citations",
@@ -58,13 +69,19 @@ Return ONLY valid JSON — an array of comparison rows. For each dimension, indi
 
 
 def synthesize_sources(sources: list[dict]) -> dict:
-    """Generate cross-source synthesis."""
-    # Build numbered source summaries
+    """Generate cross-source synthesis with exact passage citations."""
+    # Build numbered source summaries with raw content for passage extraction
     source_summaries = []
     for i, src in enumerate(sources, 1):
         extracted = src.get("extracted_data", {})
         if isinstance(extracted, str):
             extracted = json.loads(extracted)
+
+        # Include truncated raw content so the LLM can quote exact passages
+        raw_content = src.get("raw_content", "")
+        if len(raw_content) > 20000:
+            raw_content = raw_content[:20000] + "... [truncated]"
+
         source_summaries.append({
             "source_number": i,
             "title": extracted.get("title", "Unknown"),
@@ -75,6 +92,7 @@ def synthesize_sources(sources: list[dict]) -> dict:
             "findings_summary": extracted.get("findings_summary", ""),
             "scope": extracted.get("scope", ""),
             "source_type": extracted.get("source_type", ""),
+            "content": raw_content,
         })
 
     prompt = SYNTHESIS_PROMPT.format(
@@ -85,7 +103,7 @@ def synthesize_sources(sources: list[dict]) -> dict:
         c = get_client()
         response = c.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=4000,
+            max_tokens=6000,
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -96,13 +114,26 @@ def synthesize_sources(sources: list[dict]) -> dict:
         elif "```" in response_text:
             response_text = response_text.split("```")[1].split("```")[0].strip()
 
-        return json.loads(response_text)
+        result = json.loads(response_text)
+
+        # Ensure citation_passages exists on every point (fallback to empty dict)
+        for section in ("consensus", "contradictions", "connections"):
+            for item in result.get(section, []):
+                if "citation_passages" not in item:
+                    item["citation_passages"] = {}
+
+        # Ensure suggested_questions exists
+        if "suggested_questions" not in result:
+            result["suggested_questions"] = []
+
+        return result
 
     except Exception as e:
         return {
             "consensus": [],
             "contradictions": [],
             "connections": [],
+            "suggested_questions": [],
             "summary_oneline": f"Synthesis failed: {str(e)}",
             "summary_paragraph": "",
             "summary_full": "",

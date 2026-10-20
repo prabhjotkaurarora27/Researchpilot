@@ -4,6 +4,7 @@
 export default function SourceCard({ source, index, isSelected, onSelect }) {
   const extracted = source.extracted_data || {};
   const status = source.status || 'pending';
+  const credibility = source.credibility;
 
   const statusClass = {
     done: 'status-done',
@@ -40,6 +41,11 @@ export default function SourceCard({ source, index, isSelected, onSelect }) {
             {extracted.publish_date && (
               <span className="font-citation text-[0.7rem] text-[var(--color-text-muted)]">
                 {extracted.publish_date}
+              </span>
+            )}
+            {credibility && (
+              <span className={`credibility-badge credibility-${credibility.tier}`}>
+                {credibility.label} · {credibility.score}
               </span>
             )}
           </div>

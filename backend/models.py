@@ -40,6 +40,7 @@ class ExtractResponse(BaseModel):
 class ConsensusPoint(BaseModel):
     point: str
     citations: list[int]  # source indices
+    citation_passages: dict[str, str] = Field(default_factory=dict)  # {"1": "exact passage..."}
     explanation: str = ""
 
 
@@ -47,6 +48,7 @@ class SynthesisResult(BaseModel):
     consensus: list[ConsensusPoint] = Field(default_factory=list)
     contradictions: list[ConsensusPoint] = Field(default_factory=list)
     connections: list[ConsensusPoint] = Field(default_factory=list)
+    suggested_questions: list[str] = Field(default_factory=list)
     summary_oneline: str = ""
     summary_paragraph: str = ""
     summary_full: str = ""

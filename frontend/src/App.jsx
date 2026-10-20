@@ -3,17 +3,25 @@ import ResizableSplit from './components/ResizableSplit';
 import SourcePanel from './components/SourcePanel';
 import SynthesisPanel from './components/SynthesisPanel';
 import Dashboard from './components/Dashboard';
+import { synthesize } from './hooks/useApi';
 
 /**
  * ResearchPilot AI — Root Layout
  * Shows bento-grid dashboard on first load, transitions to
  * split-pane workspace when user starts working.
+ *
+ * Synthesis-first: auto-triggers synthesis after extraction
+ * and lands on the consensus board as the primary view.
  */
 export default function App() {
   const [sources, setSources] = useState([]);
   const [selectedSourceId, setSelectedSourceId] = useState(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [showWorkspace, setShowWorkspace] = useState(false);
+
+  // Hoisted synthesis state — shared between SourcePanel trigger and SynthesisPanel display
+  const [synthesisData, setSynthesisData] = useState(null);
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
 
   const handleSelectSource = useCallback((id) => {
     setSelectedSourceId((prev) => (prev === id ? null : id));
@@ -40,10 +48,44 @@ export default function App() {
     setShowWorkspace(true);
   };
 
-  // Auto-switch to workspace when sources are extracted
-  const handleSourcesExtracted = (newSources) => {
+  /**
+   * Auto-trigger synthesis after extraction completes.
+   * Called by SourcePanel when new sources finish extracting.
+   */
+  const handleSourcesExtracted = async (newSources) => {
     if (newSources.length > 0) {
       setShowWorkspace(true);
+    }
+
+    // newSources have already been added to `sources` state by SourcePanel.
+    // We need to use a timeout to let React's state update settle, then
+    // check the latest sources and auto-trigger synthesis.
+    setTimeout(() => {
+      // Read from the DOM-settled state — we use functional update to peek
+      setSources((currentSources) => {
+        const doneSources = currentSources.filter((s) => s.status === 'done');
+        if (doneSources.length >= 2) {
+          const sourceIds = doneSources.map((s) => s.id);
+          runSynthesis(sourceIds);
+        }
+        return currentSources; // no mutation
+      });
+    }, 100);
+  };
+
+  /**
+   * Run synthesis on given source IDs.
+   */
+  const runSynthesis = async (sourceIds) => {
+    setIsSynthesizing(true);
+    try {
+      const result = await synthesize(sourceIds);
+      setSynthesisData(result);
+    } catch (err) {
+      console.error('Auto-synthesis error:', err);
+      // Don't alert — silent fallback, user can still use the UI
+    } finally {
+      setIsSynthesizing(false);
     }
   };
 
@@ -97,6 +139,8 @@ export default function App() {
           right={
             <SynthesisPanel
               sources={sources}
+              synthesisData={synthesisData}
+              isSynthesizing={isSynthesizing}
               onCitationClick={handleCitationClick}
             />
           }
